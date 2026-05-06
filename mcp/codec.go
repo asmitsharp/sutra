@@ -44,6 +44,9 @@ func (id *ID) IsString() bool {
 }
 
 func (id *ID) IsNumber() bool {
+	if id.IsNull() {
+		return false
+	}
 	var n float64
 	return json.Unmarshal(id.raw, &n) == nil
 }

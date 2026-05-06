@@ -34,6 +34,7 @@ func (t *SSETransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Streaming not supported", http.StatusInternalServerError)
 		return
 	}
+	flusher.Flush()
 
 	for {
 		select {
