@@ -34,21 +34,30 @@ func (t *StdioTransport) Send(ctx context.Context, msg *mcp.JSONRPCMessage) erro
 		}
 	}
 
-	t.mu.Lock()
-	defer t.mu.Unlock()
-
-	_, err = t.writer.Write(encodedData)
-	_, err = t.writer.Write([]byte("\n"))
-
-	err = t.writer.Flush()
-
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	if err != nil {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	if _, err := t.writer.Write(encodedData); err != nil {
+		return &mcp.MCPError{
+			Code:    mcp.ErrInternal,
+			Message: "Failed to write encoded data",
+		}
+	}
+
+	if _, err := t.writer.Write([]byte("\n")); err != nil {
+		return &mcp.MCPError{
+			Code:    mcp.ErrInternal,
+			Message: "Failed to write newline",
+		}
+	}
+
+	if err := t.writer.Flush(); err != nil {
 		return &mcp.MCPError{
 			Code:    mcp.ErrInternal,
 			Message: "Failed to flush writer",

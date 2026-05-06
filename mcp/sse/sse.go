@@ -69,7 +69,12 @@ func (t *SSETransport) handleMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t.incoming <- msg
+	select {
+	case t.incoming <- msg:
+	case <-r.Context().Done():
+		http.Error(w, "Server busy", http.StatusServiceUnavailable)
+		return
+	}
 
 	w.WriteHeader(http.StatusAccepted)
 	w.Write([]byte("Message received"))

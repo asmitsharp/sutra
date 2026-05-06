@@ -168,3 +168,7 @@ func (s *Session) ClientInfo() ClientInfo {
 	defer s.mu.RUnlock()
 	return s.clientInfo
 }
+
+func (s *Session) ID() string {
+	return s.id
+}
